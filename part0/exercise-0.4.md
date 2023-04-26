@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
 participant Browser
 participant Server
@@ -16,3 +17,4 @@ participant Server
     Browser ->> Server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/data.json
     Server -->> Browser: data.json
     Note left of Browser: Browser executes event handler<br/> to render notes
+```
