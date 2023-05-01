@@ -8,4 +8,4 @@ participant Server
     Note right of Server: Server receives request<br/>to write recieved JSON data<br/>to DB
     Server -->> Browser: HTTP Code 201 Created
     Note left of Browser: Notes rendered
-    ```
+```
