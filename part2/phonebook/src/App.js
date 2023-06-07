@@ -3,9 +3,18 @@ import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import Filter from './components/Filter'
 import personSvc from './services/PersonSvc'
+import Notification from './components/Notification'
 
 const App = () => {
   const [persons, setPersons] = useState([])
+
+  const [newName, setNewName] = useState('')
+
+  const [newNumber, setNewNumber] = useState('')
+
+  const [search, setSearch] = useState('')
+
+  const [message, setMessage] = useState({text: null, style: null})
 
   useEffect(() => {
     personSvc.getAll()
@@ -14,16 +23,33 @@ const App = () => {
     })
   }, [])
 
-  const [newName, setNewName] = useState('')
-
-  const [newNumber, setNewNumber] = useState('')
-
-  const [search, setSearch] = useState('')
-
+  if(!persons){
+    return null
+  }
 
   const filteredList = persons.filter(e => e.name.toLowerCase().startsWith(search.toLowerCase()))
 
   const doFilter = search !== ''
+
+  const errorStyle = {
+    color: 'red',
+    background: 'lightgrey',
+    fontSze: '20px',
+    borderStyle: 'solid',
+    borderRadius: '5px',
+    padding: '10px',
+    marginBottom: '10px'
+  }
+
+  const okStyle = {
+    color: 'green',
+    background: 'lightgrey',
+    fontSze: '20px',
+    borderStyle: 'solid',
+    borderRadius: '5px',
+    padding: '10px',
+    marginBottom: '10px'
+  }
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -38,6 +64,27 @@ const App = () => {
         personSvc.update(findPerson.id, updatedPerson)
         .then(response => {
           setPersons(persons.map(p => p.id !== findPerson.id ? p : response.data))
+          const newMsg = {
+            text: `Updated ${newName}`,
+            style: okStyle
+          }
+          setMessage(newMsg)
+          setTimeout(() => {
+            setMessage({text: null, style: null})
+          }, 5000)
+        })
+        .catch(err => {
+          const newMsg = {
+            text: `Error updating ${newName} - see log for details`,
+            style: errorStyle
+          }
+          setMessage(newMsg)
+          console.log(err.response.data)
+          console.log(err.response.status)
+          console.log(err.response.headers)
+          setTimeout(() => {
+            setMessage({text: null, style: null})
+          }, 5000)
         })
 
       }
@@ -52,8 +99,29 @@ const App = () => {
       personSvc.create(newPerson)
       .then( response => {
         setPersons(persons.concat(response.data))
+        const newMsg = {
+          text: `Added ${newName} to phonebook`,
+          style: okStyle
+        }
+        setMessage(newMsg)
+        setTimeout(() => {
+          setMessage({text: null, style: null})
+        }, 5000)
         setNewName('')
         setNewNumber('')
+      })
+      .catch(err => {
+        const newMsg = {
+          text: `Error adding ${newName} - see log for details`,
+          style: errorStyle
+        }
+        setMessage(newMsg)
+        console.log(err.response.data)
+        console.log(err.response.status)
+        console.log(err.response.headers)
+        setTimeout(() => {
+          setMessage(null)
+        }, 5000)
       })
       
     }
@@ -68,6 +136,26 @@ const App = () => {
       personSvc.deleteRequest(id)
       .then(response => {
         persons.map(person => person.id !== id ? person : response)
+        const newMsg = {
+          text: `Deleted ${person.name}`,
+          style: okStyle
+        }
+        setMessage(newMsg)
+        setTimeout(() => {
+          setMessage({text: null, style: null})
+        }, 5000)
+      }).catch(err => {
+        const newMsg = {
+          text: `Error deleting ${person.name} - see log for details`,
+          style: errorStyle
+        }
+        setMessage(newMsg)
+        console.log(err.response.data)
+        console.log(err.response.status)
+        console.log(err.response.headers)
+        setTimeout(() => {
+          setMessage({text: null, style: null})
+        }, 5000)
       })
     setPersons(persons.filter(person => person.id !== id))
     }
@@ -95,6 +183,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification notificationStyle={message.style} message={message.text}/>
       <Filter handleSearch={handleSearch}/>
       <h2>Add new contact</h2>
       <PersonForm click={addPerson} changes={{handleNameChange, handleNumChange}} vals={{newName, newNumber}}/>
